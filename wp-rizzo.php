@@ -9,17 +9,22 @@ Description: This plugin fetches the three HTML chunks provided by Rizzo and the
 Version: 0.1
 */
 
-namespace LonelyPlanet\WP;
+namespace LonelyPlanet\WP\Rizzo;
+
 use LonelyPlanet\Rizzo\Rizzo;
 use LonelyPlanet\DataStore\DataStore;
 use LonelyPlanet\DataStore\WPCacheStore;
 use LonelyPlanet\DataStore\TransientStore;
 
-
+include __DIR__ . '/inc/functions.php';
 include __DIR__ . '/inc/Rizzo/Rizzo.php';
 include __DIR__ . '/inc/DataStore/DataStore.php';
 include __DIR__ . '/inc/DataStore/WPCacheStore.php';
 include __DIR__ . '/inc/DataStore/TransientStore.php';
+
+if (is_admin()) {
+    include __DIR__ . '/inc/options.php';
+}
 
 add_action('init', function () {
 
@@ -32,17 +37,17 @@ add_action('init', function () {
 
     global $rizzo;
 
-    // $store = new WPCacheStore('html', 'rizzo', 60 );
-    $store = new TransientStore('html', 'rizzo', 60 );
+    $store = new WPCacheStore('html', 'rizzo', 0 );
+    // $store = new TransientStore('html', 'rizzo', 60 );
 
     $rizzo = new Rizzo( $store );
 
     add_action('wp_head', function () use ($rizzo) {
-        echo $rizzo->get('head');
+        echo $rizzo->get('head_endpoint');
     } );
 
     add_action('wp_footer', function () use ($rizzo) {
-        echo $rizzo->get('footer');
+        echo $rizzo->get('footer_endpoint');
     } );
 
 } );
@@ -51,5 +56,5 @@ function rizzo_body()
 {
     global $rizzo;
     if (isset($rizzo))
-        echo $rizzo->get('body');
+        echo $rizzo->get('body_endpoint');
 }

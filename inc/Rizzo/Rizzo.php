@@ -8,39 +8,36 @@ class Rizzo {
     protected $endpoints;
     protected $args;
     protected $storage;
+    protected $options;
 
     public function __construct(DataStore $storage, array $args = array())
     {
-        $this->endpoints = apply_filters(
-            'rizzo-endpoints',
+        $this->options = array_merge(
             array(
-                'head'   => 'http://rizzo.lonelyplanet.com/modern/head',
-                'body'   => 'http://rizzo.lonelyplanet.com/modern/body-header',
-                'footer' => 'http://rizzo.lonelyplanet.com/modern/body-footer'
-            )
+                'head_endpoint'   => 'http://rizzo.lonelyplanet.com/modern/head',
+                'body_endpoint'   => 'http://rizzo.lonelyplanet.com/modern/body-header',
+                'footer_endpoint' => 'http://rizzo.lonelyplanet.com/modern/body-footer',
+                'timeout'         => 10,
+            ),
+            get_option('rizzo', array())
         );
 
-        $this->args = $args;
+        $this->options = apply_filters('rizzo-options', $this->options);
+
+        $this->endpoints = array(
+            'head_endpoint'   => &$this->options['head_endpoint'],
+            'body_endpoint'   => &$this->options['body_endpoint'],
+            'footer_endpoint' => &$this->options['footer_endpoint'],
+        );
 
         $this->storage = $storage;
  
-        /*
-        $this->args = array(
-            'timeout'     => 5,
-            'redirection' => 5,
-            'httpversion' => '1.0',
-            'user-agent'  => 'WordPress/' . $wp_version . '; ' . get_bloginfo( 'url' ),
-            'blocking'    => true,
-            'headers'     => array(),
-            'cookies'     => array(),
-            'body'        => null,
-            'compress'    => false,
-            'decompress'  => true,
-            'sslverify'   => true,
-            'stream'      => false,
-            'filename'    => null
+        $this->args = array_merge(
+            array(
+                'timeout' => $this->options['timeout']
+            ),
+            $args
         );
-        */
     }
 
     public function __destruct()
