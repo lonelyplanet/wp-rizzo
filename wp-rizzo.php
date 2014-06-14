@@ -26,6 +26,34 @@ if (is_admin()) {
     include __DIR__ . '/inc/options.php';
 }
 
+
+$after_body = '';
+
+function buffer_template()
+{
+    ob_start( __NAMESPACE__ . '\handle_buffer');
+    global $after_body;
+    $after_body = \LonelyPlanet\WP\Rizzo\rizzo_body();
+
+}
+add_action('init', __NAMESPACE__ . '\buffer_template', PHP_INT_MAX, 0);
+
+
+function handle_buffer($buffer)
+{
+    global $after_body;
+    return substr_replace(
+        $buffer,
+        $after_body,
+        stripos(
+            $buffer,
+            '>',
+            stripos($buffer, '<body')
+        ) + 1,
+        0
+    );
+}
+
 add_action('init', function () {
 
     /*
@@ -37,10 +65,10 @@ add_action('init', function () {
 
     global $rizzo;
 
-    $store = new WPCacheStore('html', 'rizzo', 0 );
+    // $store = new WPCacheStore('html', 'rizzo', 0 );
     // $store = new TransientStore('html', 'rizzo', 60 );
 
-    $rizzo = new Rizzo( $store );
+    $rizzo = new Rizzo();
 
     add_action('wp_head', function () use ($rizzo) {
         echo $rizzo->get('head_endpoint');

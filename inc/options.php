@@ -137,7 +137,7 @@ class RizzoSettingsPage {
 
         foreach ($this->endpoints as $endpoint => $label) {
             if (isset($input[$endpoint]) && ! empty($input[$endpoint])) {
-                $new_input['head_endpoint'] = filter_var($input[$endpoint], FILTER_VALIDATE_URL);
+                $new_input[$endpoint] = filter_var($input[$endpoint], FILTER_VALIDATE_URL);
             }
         }
 
@@ -150,7 +150,7 @@ class RizzoSettingsPage {
 
     public function print_api_endpoint_info()
     {
-        echo 'Enter your custom API endoints below. If you don&#8217;t fill this in, the default endpoints will be used.';
+        echo '<p>Enter your custom API endoints below. If you don&#8217;t fill this in, the default endpoints will be used.</p>';
     }
 
     public function input($args)

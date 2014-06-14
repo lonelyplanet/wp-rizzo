@@ -3,7 +3,7 @@
 namespace LonelyPlanet\Rizzo;
 use LonelyPlanet\DataStore\DataStore;
 
-class Rizzo {
+class RizzoAPI {
 
     protected $endpoints;
     protected $args;
