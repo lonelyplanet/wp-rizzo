@@ -39,6 +39,8 @@ class RizzoPlugin {
 
             add_action('admin_init', array($this, 'admin_init'));
             add_action('admin_menu', array($this, 'add_plugin_page'));
+    
+            add_filter('plugin_action_links_' . plugin_basename($this->plugin_file), array($this, 'plugin_links'), 10, 2 );
 
         } else {
 
@@ -59,6 +61,17 @@ class RizzoPlugin {
         register_activation_hook($this->plugin_file,   array($this, 'activate'));
         register_deactivation_hook($this->plugin_file, array($this, 'deactivate'));
 
+    }
+
+    function plugin_links($links, $file)
+    {
+        if ($file == plugin_basename($this->plugin_file)) {
+            array_unshift(
+                $links,
+                sprintf('<a href="%1$s">%2$s</a>', menu_page_url($this->menu_slug, false), __('Settings') )
+            );
+        }
+        return $links;
     }
 
     public function add_plugin_page()
@@ -268,6 +281,15 @@ class RizzoPlugin {
                 $new_input[$key] = false;
         }
 
+        /*
+            This forces a database update, which causes the update_option_rizzo
+            action to be called, which then calls the cron.
+
+            I wanted a simple way to allow the end user to hit the API on demand,
+            instead of waiting for the cron to run.
+        */
+        $new_input['force-cron'] = uniqid();
+
         return $new_input;
     }
 
@@ -307,7 +329,7 @@ class RizzoPlugin {
     public function add_cron_schedule($schedules)
     {
         $schedules['rizzo-schedule'] = array(
-            'interval' => $this->option('cron-time', 60),
+            'interval' => $this->option('cron-time', 300),
             'display'  => 'Rizzo Schedule'
         );
         return $schedules;
@@ -345,9 +367,6 @@ class RizzoPlugin {
 
     public function input($args)
     {
-
-        // var_dump($args);
-
         if ( ! isset($args['attributes'])) {
             $args['attributes'] = array();
         }
