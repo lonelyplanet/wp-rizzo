@@ -32,7 +32,7 @@ class RizzoPlugin {
 
         add_filter('cron_schedules',      array($this, 'add_cron_schedule'));
 
-        add_action('rizzo-schedule-cron', array($this, 'run_cron'));
+        add_action('rizzo-cron',          array($this, 'run_cron'));
         add_action('update_option_rizzo', array($this, 'rizzo_option_updated'), 10, 2);
 
         if (is_admin()) {
@@ -42,15 +42,18 @@ class RizzoPlugin {
 
         } else {
 
+            // Set the priority to 1 so that it is printed higher up in the head section.
+            // This iwll allow other queued css to override it.
             if ($this->option('insert-head'))
-                add_action('wp_head', array($this, 'head'));
+                add_action('wp_head', array($this, 'head'), 1, 0);
 
             // This will automatically insert the body header content using ob_start().
             if ($this->option('insert-body'))
                 add_action('init', array($this, 'buffer_template'), 1, 0);
 
             if ($this->option('insert-footer'))
-                add_action('wp_footer', array($this, 'footer'));
+                add_action('wp_footer', array($this, 'footer'), 1, 0);
+
         }   
 
         register_activation_hook($this->plugin_file,   array($this, 'activate'));
@@ -275,25 +278,30 @@ class RizzoPlugin {
 
     public function print_cron_section_info()
     {
-        printf('<p>Cron run count: %d</p>', get_option('rizzo-cron-run-count', 0));
+        $last_run = get_option('rizzo-cron-last-run', array());
+        printf(
+            '<p>Cron run count: %1$d | Last run: %2$s ago',
+            get_option('rizzo-cron-run-count', 0),
+            human_time_diff($last_run['stop'], time())
+        );
     }
 
 
     public function rizzo_option_updated($old_value, $value)
     {
         // After the option has been updated, run the cron again to fetch content from the API.
-        do_action('rizzo-schedule-cron');
+        do_action('rizzo-cron');
     }
 
     public function activate()
     {
-        wp_schedule_event(current_time('timestamp'), 'rizzo-schedule', 'rizzo-schedule-cron');
-        do_action('rizzo-schedule-cron');
+        wp_schedule_event(time(), 'rizzo-schedule', 'rizzo-cron');
+        do_action('rizzo-cron');
     }
 
     public function deactivate()
     {
-        wp_clear_scheduled_hook('rizzo-schedule-cron');
+        wp_clear_scheduled_hook('rizzo-cron');
     }
 
     public function add_cron_schedule($schedules)
