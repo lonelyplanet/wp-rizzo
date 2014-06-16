@@ -1,17 +1,18 @@
 # WP Rizzo
 
-This plugin provides html content from http://rizzo.lonelyplanet.com.
-It will automatically include the head section and the body footer section.
-WordPress does not currently have a function like wp_footer() for the body.
+This plugin provides html content from http://rizzo.lonelyplanet.com/.
+It will automatically include the head section, body header, and footer section.
 
-To get the body header html, edit your theme and place this after you opening body tag.
+It hooks into the wp_head and wp_footer functions to output the HTML content.
 
-```php
-<?php
-if (function_exists('\LonelyPlanet\WP\rizzo_body'))
-    \LonelyPlanet\WP\rizzo_body();
-?>
-```
+Since WordPress doesn't have a function like wp_footer for the body, I had to use
+output buffering to enable automatically inserting the body header into the html.
 
-## Todo
-Update plugin to use output buffering so that I can dynamically insert the code in the correct place without a needing to edit a theme.
+## Features
+
+I've created a settings page where you can change the following:
+
+* API endpoint URLs
+* API connection timeout limit (seconds)
+* WP cron interval (seconds)
+* Which content to auto insert into the HTML.
