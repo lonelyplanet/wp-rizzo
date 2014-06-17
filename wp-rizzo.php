@@ -44,17 +44,21 @@ class RizzoPlugin {
 
         } else {
 
-            // Set the priority to 1 so that it is printed higher up in the head section.
-            // This iwll allow other queued css to override it.
-            if ($this->option('insert-head'))
-                add_action('wp_head', array($this, 'head'), 1, 0);
+            if ( ! in_array($GLOBALS['pagenow'], array('wp-login.php', 'wp-register.php'))) {
 
-            // This will automatically insert the body header content using ob_start().
-            if ($this->option('insert-body'))
-                add_action('init', array($this, 'buffer_template'), 1, 0);
+                // Set the priority to 1 so that it is printed higher up in the head section.
+                // This iwll allow other queued css to override it.
+                if ($this->option('insert-head'))
+                    add_action('wp_head', array($this, 'head'), 1, 0);
 
-            if ($this->option('insert-footer'))
-                add_action('wp_footer', array($this, 'footer'), 1, 0);
+                // This will automatically insert the body header content using ob_start().
+                if ($this->option('insert-body'))
+                    add_action('init', array($this, 'buffer_template'), 1, 0);
+
+                if ($this->option('insert-footer'))
+                    add_action('wp_footer', array($this, 'footer'), 1, 0);
+
+            }
 
         }   
 
