@@ -34,12 +34,12 @@ class RizzoPlugin {
 
         add_action('rizzo-cron',          array($this, 'run_cron'));
         add_action('update_option_rizzo', array($this, 'rizzo_option_updated'), 10, 2);
+        add_action('admin_bar_menu',      array($this, 'modify_admin_bar'), 1000, 1);
 
         if (is_admin()) {
 
             add_action('admin_init', array($this, 'admin_init'));
             add_action('admin_menu', array($this, 'add_plugin_page'));
-    
             add_filter('plugin_action_links_' . plugin_basename($this->plugin_file), array($this, 'plugin_links'), 10, 2 );
 
         } else {
@@ -67,12 +67,24 @@ class RizzoPlugin {
 
     }
 
+    public function modify_admin_bar($bar)
+    {
+        $bar->add_node(
+            array(
+                'id'    => 'rizzo-settings',
+                'title' => 'Rizzo Settings',
+                'href'  => admin_url('options-general.php?page=rizzo-settings'),
+                // 'meta'  => array( 'class' => 'my-toolbar-page' )
+            )
+        );
+    }
+
     function plugin_links($links, $file)
     {
         if ($file == plugin_basename($this->plugin_file)) {
             array_unshift(
                 $links,
-                sprintf('<a href="%1$s">%2$s</a>', menu_page_url($this->menu_slug, false), __('Settings') )
+                sprintf('<a href="%1$s">%2$s</a>', \menu_page_url($this->menu_slug, false), 'Settings')
             );
         }
         return $links;
