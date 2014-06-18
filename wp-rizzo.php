@@ -317,7 +317,7 @@ class RizzoPlugin {
         if (isset($last_run['start'], $last_run['stop'])) {
             printf(
                 '<p>Cron run count: %1$d | Last run: %2$s ago</p>',
-                get_option('rizzo-cron-run-count', 0),
+                number_format(get_option('rizzo-cron-run-count', 0)),
                 human_time_diff($last_run['stop'], time())
             );
         } else {

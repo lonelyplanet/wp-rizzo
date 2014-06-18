@@ -16,3 +16,15 @@ I've created a settings page where you can change the following:
 * API connection timeout limit (seconds)
 * WP cron interval (seconds)
 * Which content to auto insert into the HTML.
+
+### Output Buffering
+
+If you don't want to use output buffering, uncheck "Insert Body Content" on the settings page.
+To get the body header into your site, place this in your theme after the <body> tag:
+
+```php
+<?php
+if (function_exists('\LonelyPlanet\Rizzo\body'))
+    \LonelyPlanet\Rizzo\body();
+?>
+```
