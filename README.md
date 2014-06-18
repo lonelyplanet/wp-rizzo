@@ -6,7 +6,7 @@ It will automatically include the head section, body header, and footer section.
 It hooks into the wp_head and wp_footer functions to output the HTML content.
 
 Since WordPress doesn't have a function like wp_footer for the body, I had to use
-output buffering to enable automatically inserting the body header into the html.
+output buffering to automatically insert the body header into the html.
 
 ## Features
 
@@ -19,8 +19,7 @@ I've created a settings page where you can change the following:
 
 ### Output Buffering
 
-If you don't want to use output buffering, uncheck "Insert Body Content" on the settings page.
-To get the body header into your site, place this in your theme after the <body> tag:
+If you don’t want to use output buffering, uncheck "Insert Body Content", and place this in your theme after the <body> tag:
 
 ```php
 <?php

@@ -257,8 +257,11 @@ class RizzoPlugin {
 
     public function print_html_output_info()
     {
+        echo '<p>This plugin hooks into the wp_head and wp_footer functions to output the HTML content for those sections.</p>';
+        echo '<p>Since WordPress doesn&#8217;t have a function like wp_footer for the body, I had to use output buffering to automatically insert the body header into the html.</p>';
+
         printf(
-            '<p>If you don&#8217;t want to use output buffering, you can place this in your theme after the <code>&lt;body&gt;</code> tag:</p><p>%1$s</p>',
+            '<p>If you don&#8217;t want to use output buffering, uncheck "Insert Body Content", and place this in your theme after the <code>&lt;body&gt;</code> tag:</p><p>%1$s</p>',
             highlight_string("<?php\nif (function_exists('\\LonelyPlanet\\Rizzo\\body'))\n\t\\LonelyPlanet\\Rizzo\\body();\n?>", true)
         );
 
