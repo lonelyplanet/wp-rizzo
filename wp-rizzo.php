@@ -74,7 +74,6 @@ class RizzoPlugin {
                 'id'    => 'rizzo-settings',
                 'title' => 'Rizzo Settings',
                 'href'  => admin_url('options-general.php?page=rizzo-settings'),
-                // 'meta'  => array( 'class' => 'my-toolbar-page' )
             )
         );
     }
@@ -217,7 +216,6 @@ class RizzoPlugin {
                     'id'    => 'timeout',
                     'type'  => 'number',
                     'value' => $this->options['timeout'],
-
                 )
             )
         );
@@ -282,11 +280,6 @@ class RizzoPlugin {
     public function sanitize($input)
     {
         $new_input = array();
-
-        /*
-        var_dump($input);
-        wp_die();
-        */
 
         foreach ($this->endpoints as $endpoint => $label) {
             if (isset($input[$endpoint]) && ! empty($input[$endpoint])) {
