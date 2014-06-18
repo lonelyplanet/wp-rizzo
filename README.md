@@ -19,7 +19,7 @@ I've created a settings page where you can change the following:
 
 ### Output Buffering
 
-If you don’t want to use output buffering, uncheck "Insert Body Content", and place this in your theme after the &lt:body&gt; tag:
+If you don’t want to use output buffering, uncheck "Insert Body Content", and place this in your theme after the &lt;body&gt; tag:
 
 ```php
 <?php
