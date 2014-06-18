@@ -139,7 +139,7 @@ class RizzoPlugin {
         );
     }
 
-    protected function option($name, $default = '')
+    public function option($name, $default = '')
     {
         return isset($this->options[$name]) ? $this->options[$name] : $default;
     }
@@ -155,7 +155,7 @@ class RizzoPlugin {
             'timeout'         => 'Connection Timeout (seconds)',
             'cron-time'       => 'Cron Interval (seconds)',
             'insert-head'     => 'Insert Head Content',
-            'insert-body'     => 'Insert Body Content',
+            'insert-body'     => 'Insert Body Content<br /><small>This uses output buffering.</small>',
             'insert-footer'   => 'Insert Footer Content',
         );
 
@@ -176,7 +176,7 @@ class RizzoPlugin {
                 'rizzo-api-endpoints',
                 array(
                     'label_for'  => $key,
-                    'value'      => $this->options[$key],
+                    'value'      => $endpoint,
                     'attributes' => array(
                         'id'    => $key,
                         'class' => 'widefat',
@@ -229,7 +229,7 @@ class RizzoPlugin {
         add_settings_section(
             'rizzo-html-output',
             'HTML Output',
-            null, //array( $this, 'print_api_endpoint_info' ),
+            array( $this, 'print_html_output_info' ),
             $this->menu_slug
         );
 
@@ -253,6 +253,15 @@ class RizzoPlugin {
             );
 
         }
+    }
+
+    public function print_html_output_info()
+    {
+        printf(
+            '<p>If you don&#8217;t want to use output buffering, you can place this in your theme after the <code>&lt;body&gt;</code> tag:</p><p>%1$s</p>',
+            highlight_string("<?php\nif (function_exists('\\LonelyPlanet\\Rizzo\\body'))\n\t\\LonelyPlanet\\Rizzo\\body();\n?>", true)
+        );
+
     }
 
     public function sanitize($input)
@@ -305,11 +314,15 @@ class RizzoPlugin {
     public function print_cron_section_info()
     {
         $last_run = get_option('rizzo-cron-last-run', array());
-        printf(
-            '<p>Cron run count: %1$d | Last run: %2$s ago',
-            get_option('rizzo-cron-run-count', 0),
-            human_time_diff($last_run['stop'], time())
-        );
+        if (isset($last_run['start'], $last_run['stop'])) {
+            printf(
+                '<p>Cron run count: %1$d | Last run: %2$s ago</p>',
+                get_option('rizzo-cron-run-count', 0),
+                human_time_diff($last_run['stop'], time())
+            );
+        } else {
+            echo '<p>Cron has not run yet.</p>';
+        }
     }
 
 
@@ -362,6 +375,11 @@ class RizzoPlugin {
     public function head()
     {
         echo $this->get('head');
+    }
+
+    public function body()
+    {
+        echo $this->get('body');
     }
 
     public function footer()
@@ -447,4 +465,20 @@ class RizzoPlugin {
     }
 }
 
-new RizzoPlugin(__FILE__);
+global $wprizzo;
+$wprizzo = new RizzoPlugin(__FILE__);
+
+/**
+If you don't want to use output buffering, you can place this in your theme after the <body> tag:
+
+if (function_exists('\LonelyPlanet\Rizzo\body'))
+    \LonelyPlanet\Rizzo\body();
+*/
+function body()
+{
+    global $wprizzo;
+    // Don't do anything if the user preference is to auto insert the body header.
+    if (isset($wprizzo) && $wprizzo->option('insert-body', false) === false) {
+        $wprizzo->body();
+    }
+}
