@@ -1,15 +1,7 @@
 <?php
-/*
-Plugin Name: WP Rizzo
-Plugin Group: Lonely Planet
-Plugin URI: http://lonelyplanet.com/
-Author: Eric King
-Author URI: http://webdeveric.com/
-Description: This plugin fetches the three HTML chunks provided by Rizzo and then automatically inserts them into the theme output.
-Version: 0.2
-*/
-
 namespace LonelyPlanet\Rizzo;
+
+defined('WP_RIZZO_FILE') || exit;
 
 include __DIR__ . '/inc/functions.php';
 
@@ -474,7 +466,7 @@ class RizzoPlugin {
 }
 
 global $wprizzo;
-$wprizzo = new RizzoPlugin(__FILE__);
+$wprizzo = new RizzoPlugin(WP_RIZZO_FILE);
 
 /**
 If you don't want to use output buffering, you can place this in your theme after the <body> tag:
