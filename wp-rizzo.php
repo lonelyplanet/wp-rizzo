@@ -1,7 +1,7 @@
 <?php
 namespace LonelyPlanet\Rizzo;
 
-defined('WP_RIZZO_FILE') || exit;
+defined('ABSPATH') || exit;
 
 include __DIR__ . '/inc/functions.php';
 
