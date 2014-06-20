@@ -13,8 +13,13 @@ class RizzoPlugin {
     protected $endpoints;
     protected $args;
 
-    private $plugin_file;
-    private $menu_slug;
+    protected $plugin_file;
+    protected $menu_slug;
+
+    protected $timeout_min;
+    protected $timeout_max;
+    protected $cron_time_min;
+    protected $cron_time_max;
 
     public function __construct($plugin_file)
     {
@@ -88,7 +93,7 @@ class RizzoPlugin {
             'Rizzo Settings',
             'manage_options',
             $this->menu_slug = 'rizzo-settings',
-            array( $this, 'create_admin_page' )
+            array($this, 'create_admin_page')
         );
     }
 
@@ -102,7 +107,7 @@ class RizzoPlugin {
             <?php
                 // This prints out all hidden setting fields
                 settings_fields('rizzo');   
-                do_settings_sections( 'rizzo-settings' );
+                do_settings_sections('rizzo-settings');
                 submit_button(); 
             ?>
             </form>
@@ -132,9 +137,9 @@ class RizzoPlugin {
         );
 
         $this->endpoints = array(
-            'head'   => &$this->options['head-endpoint'],
-            'body'   => &$this->options['body-endpoint'],
-            'footer' => &$this->options['footer-endpoint'],
+            'head-endpoint'   => &$this->options['head-endpoint'],
+            'body-endpoint'   => &$this->options['body-endpoint'],
+            'footer-endpoint' => &$this->options['footer-endpoint'],
         );
 
         $this->args = array(
@@ -149,12 +154,18 @@ class RizzoPlugin {
 
     public function admin_init()
     {
+
+        $this->timeout_min   = apply_filters('rizzo-timeout-min', 0);
+        $this->timeout_max   = apply_filters('rizzo-timeout-max', 60);
+        $this->cron_time_min = apply_filters('rizzo-cron-time-min', 60); // One minute
+        $this->cron_time_max = apply_filters('rizzo-cron-time-max', 60 * 60 * 24); // One day
+
         register_setting('rizzo', 'rizzo', array($this, 'sanitize'));
 
         $labels = array(
-            'head'            => 'Head Endpoint',
-            'body'            => 'Body Endpoint',
-            'footer'          => 'Footer Endpoint',
+            'head-endpoint'   => 'Head Endpoint',
+            'body-endpoint'   => 'Body Endpoint',
+            'footer-endpoint' => 'Footer Endpoint',
             'timeout'         => 'Connection Timeout (seconds)',
             'cron-time'       => 'Cron Interval (seconds)',
             'insert-head'     => 'Insert Head Content',
@@ -165,7 +176,7 @@ class RizzoPlugin {
         add_settings_section(
             'rizzo-api-endpoints',
             'API Endpoints',
-            array( $this, 'print_api_endpoint_info' ),
+            array($this, 'print_api_endpoint_info'),
             $this->menu_slug
         );
 
@@ -192,7 +203,7 @@ class RizzoPlugin {
         add_settings_section(
             'rizzo-cron',
             'Cron Settings',
-            array( $this, 'print_cron_section_info'),
+            array($this, 'print_cron_section_info'),
             $this->menu_slug
         );
 
@@ -208,6 +219,8 @@ class RizzoPlugin {
                     'id'    => 'timeout',
                     'type'  => 'number',
                     'value' => $this->options['timeout'],
+                    'min'   => $this->timeout_min,
+                    'max'   => $this->timeout_max
                 )
             )
         );
@@ -224,6 +237,8 @@ class RizzoPlugin {
                     'id'    => 'cron-time',
                     'type'  => 'number',
                     'value' => $this->options['cron-time'],
+                    'min'   => $this->cron_time_min,
+                    'max'   => $this->cron_time_max
                 )
             )
         );
@@ -231,7 +246,7 @@ class RizzoPlugin {
         add_settings_section(
             'rizzo-html-output',
             'HTML Output',
-            array( $this, 'print_html_output_info' ),
+            array($this, 'print_html_output_info'),
             $this->menu_slug
         );
 
@@ -269,22 +284,42 @@ class RizzoPlugin {
 
     }
 
+    public function rizzo_url($url)
+    {
+        $url = filter_var($url, FILTER_VALIDATE_URL);
+
+        if ($url !== false) {
+            $host = strtolower(parse_url($url, PHP_URL_HOST));
+            return $host === 'rizzo.lonelyplanet.com' ? $url : false;
+        }
+
+        return $url;
+    }
+
     public function sanitize($input)
     {
         $new_input = array();
 
         foreach ($this->endpoints as $endpoint => $label) {
             if (isset($input[$endpoint]) && ! empty($input[$endpoint])) {
-                $new_input[$endpoint] = filter_var($input[$endpoint], FILTER_VALIDATE_URL);
+                $new_input[$endpoint] = $this->rizzo_url($input[$endpoint]);
             }
         }
 
         if (isset($input['timeout'])) {
-            $new_input['timeout'] = \LonelyPlanet\Func\number_in_range($input['timeout'], 0, 60);
+            $new_input['timeout'] = \LonelyPlanet\Func\number_in_range(
+                $input['timeout'],
+                $this->timeout_min,
+                $this->timeout_max
+            );
         }
 
         if (isset($input['cron-time'])) {
-            $new_input['cron-time'] = \LonelyPlanet\Func\number_in_range($input['cron-time'], 60, 3600);
+            $new_input['cron-time'] = \LonelyPlanet\Func\number_in_range(
+                $input['cron-time'],
+                $this->cron_time_min,
+                $this->cron_time_max
+            );
         }
 
         foreach (array('insert-head','insert-body','insert-footer') as $key) {
@@ -346,7 +381,7 @@ class RizzoPlugin {
     public function add_cron_schedule($schedules)
     {
         $schedules['rizzo-schedule'] = array(
-            'interval' => $this->option('cron-time', 300),
+            'interval' => $this->option('cron-time'),
             'display'  => 'Rizzo Schedule'
         );
         return $schedules;
@@ -355,7 +390,7 @@ class RizzoPlugin {
     public function buffer_template()
     {
         ob_start(array($this, 'handle_buffer'));
-        $this->after_body = $this->get('body');
+        $this->after_body = $this->get('body-endpoint');
     }
 
     function handle_buffer($buffer)
@@ -374,17 +409,17 @@ class RizzoPlugin {
 
     public function head()
     {
-        echo $this->get('head');
+        echo $this->get('head-endpoint');
     }
 
     public function body()
     {
-        echo $this->get('body');
+        echo $this->get('body-endpoint');
     }
 
     public function footer()
     {
-        echo $this->get('footer');
+        echo $this->get('footer-endpoint');
     }
 
     public function input($args)

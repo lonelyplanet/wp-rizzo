@@ -6,7 +6,7 @@ Plugin URI: http://lonelyplanet.com/
 Author: Eric King
 Author URI: http://webdeveric.com/
 Description: This plugin fetches the three HTML chunks provided by Rizzo and then automatically inserts them into the theme output.
-Version: 0.2.1
+Version: 0.2.2
 */
 
 defined('ABSPATH') || exit;
