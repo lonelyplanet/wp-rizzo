@@ -397,7 +397,7 @@ class RizzoPlugin {
     {
         return substr_replace(
             $buffer,
-            $this->after_body,
+            apply_filters('rizzo-after-body', $this->after_body),
             stripos(
                 $buffer,
                 '>',
