@@ -407,19 +407,19 @@ class RizzoPlugin {
         );
     }
 
-    public function head()
+    public function head($print = true)
     {
-        echo $this->get('head-endpoint');
+        return $this->get('head-endpoint', $print);
     }
 
-    public function body()
+    public function body($return = true)
     {
-        echo $this->get('body-endpoint');
+        return $this->get('body-endpoint', $print);
     }
 
-    public function footer()
+    public function footer($return = true)
     {
-        echo $this->get('footer-endpoint');
+        return $this->get('footer-endpoint', $print);
     }
 
     public function input($args)
@@ -466,11 +466,15 @@ class RizzoPlugin {
         }
     }
 
-    public function get($name)
+    public function get($name, $print = false)
     {
-        $key = 'rizzo_html_' . $name;
-        $html = get_option($key, '');
-        return apply_filters($key, $html);
+        $key  = 'rizzo_html_' . $name;
+        $html = apply_filters($key, get_option($key, ''));
+
+        if ($print)
+            echo $html;
+
+        return $html;
     }
 
     public function set($name, $html)
