@@ -502,12 +502,15 @@ class RizzoPlugin {
     }
 
 
-    public function rizzo_cron_option_updated($old_value, $value)
+    public function rizzo_cron_option_updated($old_value, $new_value)
     {
-        if ($value['disable-cron']) {
+        if ($new_value['disable-cron']) {
             $this->disable_cron();
         } else {
-            $this->enable_cron();
+            if ($old_value['cron-time'] !== $new_value['cron-time']) {
+                $this->disable_cron();
+            }
+            $this->enable_cron($new_value['cron-time']);
         }
     }
 
@@ -523,11 +526,19 @@ class RizzoPlugin {
         $this->disable_cron();
     }
 
-    public function enable_cron()
+    public function enable_cron($cron_time = null)
     {
         if ( ! wp_next_scheduled('rizzo-cron')){
-            $start_time = (int)$this->option('cron-time', 0) + time();
-            wp_schedule_event($start_time, 'rizzo-schedule', 'rizzo-cron');
+
+            if ( ! isset($cron_time))
+                $cron_time = $this->option('cron-time', 0);
+
+            wp_schedule_event(
+                (int)$cron_time + time(),
+                'rizzo-schedule',
+                'rizzo-cron'
+            );
+
         }
     }
 
