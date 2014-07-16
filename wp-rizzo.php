@@ -36,6 +36,7 @@ class RizzoPlugin {
         add_action('rizzo-fetch-error',        array(&$this, 'fetch_error'), 10, 4);
         add_action('update_option_rizzo-cron', array(&$this, 'rizzo_cron_option_updated'), 10, 2);
         add_action('admin_bar_menu',           array(&$this, 'modify_admin_bar'), 1000, 1);
+        add_action('init',                     array(&$this, 'check_enable_cron'), 10, 0);
 
         add_filter('cron_schedules',           array(&$this, 'add_cron_schedule'));
 
@@ -231,7 +232,7 @@ class RizzoPlugin {
 
         $this->settings_tabs = array(
             'rizzo-api'         => 'Rizzo API',
-            'rizzo-cron'        => 'Cron',
+            'rizzo-cron'        => 'Schedule',
             'rizzo-theme-hooks' => 'Theme Hooks'
         );
 
@@ -330,14 +331,14 @@ class RizzoPlugin {
 
         add_settings_section(
             'rizzo-cron',
-            'Cron Settings',
+            'Schedule Settings',
             array(&$this, 'print_cron_section_info'),
             $tab
         );
 
         add_settings_field(
             'timeout',
-            'Connection Timeout (seconds)',
+            'Connection Timeout<br /><small>number of seconds</small>',
             array(&$this, 'input'),
             $tab,
             'rizzo-cron',
@@ -356,7 +357,7 @@ class RizzoPlugin {
 
         add_settings_field(
             'cron-time',
-            'Cron Interval (seconds)',
+            'Cron Interval<br /><small>number of seconds</small>',
             array(&$this, 'input'),
             $tab,
             'rizzo-cron',
@@ -499,6 +500,9 @@ class RizzoPlugin {
 
         echo '<p>', implode(' | ', $messages), '</p>';
 
+        echo '<p>This plugin uses <a href="http://codex.wordpress.org/Function_Reference/wp_schedule_event" target="_blank">scheduled events</a>, which is the way WordPress does cron jobs.</p>';
+        echo '<p>If you don&#8217t want to always have the latest content from rizzo, you can disable the cron below.</p>';
+
     }
 
 
@@ -516,9 +520,6 @@ class RizzoPlugin {
 
     public function activate()
     {
-        if ($this->option('disable-cron', false) === false) {
-            $this->enable_cron();
-        }
     }
 
     public function deactivate()
@@ -526,9 +527,16 @@ class RizzoPlugin {
         $this->disable_cron();
     }
 
+    public function check_enable_cron()
+    {
+        if ($this->option('disable-cron', false) === false) {
+            $this->enable_cron();
+        } 
+    }
+
     public function enable_cron($cron_time = null)
     {
-        if ( ! wp_next_scheduled('rizzo-cron')){
+        if ( ! wp_next_scheduled('rizzo-cron')) {
 
             if ( ! isset($cron_time))
                 $cron_time = $this->option('cron-time', 0);
@@ -546,7 +554,6 @@ class RizzoPlugin {
     {
         wp_clear_scheduled_hook('rizzo-cron');
     }
-
 
     public function add_cron_schedule($schedules)
     {
@@ -666,7 +673,7 @@ class RizzoPlugin {
 
         }
 
-        // $response is either a WP_Error or response code is not 200.
+        // $response is either an instance of WP_Error or the response code is not 200.
         do_action('rizzo-fetch-error', $url, $option_key, $args, $response);
 
         return false;
