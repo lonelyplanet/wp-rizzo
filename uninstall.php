@@ -12,6 +12,8 @@ $options = array(
     'rizzo-cron-run-count',
     'rizzo_html_head-endpoint',
     'rizzo_html_body-endpoint',
+    'rizzo_html_pre-header-endpoint',
+    'rizzo_html_post-header-endpoint',
     'rizzo_html_footer-endpoint',
 );
 
