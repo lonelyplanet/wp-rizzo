@@ -8,6 +8,7 @@ include __DIR__ . '/inc/functions.php';
 class RizzoPlugin {
 
     protected $after_body;
+    protected $wrapper_printed;
     protected $options;
     protected $rules;
     protected $endpoints;
@@ -57,11 +58,13 @@ class RizzoPlugin {
                     add_action('wp_head', array(&$this, 'head'), 1, 0);
 
                 // This will automatically insert the body header content using ob_start().
-                if ($this->option('insert-body'))
+                if ($this->insert_header())
                     add_action('init', array(&$this, 'buffer_template'), 1, 0);
 
                 if ($this->option('insert-footer'))
                     add_action('wp_footer', array(&$this, 'footer'), 1, 0);
+
+                add_action('wp_footer', array(&$this, 'close_wrapper'), 1000, 0);
 
             }
 
@@ -158,15 +161,18 @@ class RizzoPlugin {
 
     public function init()
     {
+        $this->wrapper_printed = false;
+
         /*
         If you want to filter these in your own plugin, use something like this:
         add_filter('pre_option_rizzo-api', 'your_callable', 10, 1);
         */
         $this->rizzo_api = array_merge(
             array(
-                'head-endpoint'   => 'http://rizzo.lonelyplanet.com/modern/head',
-                'body-endpoint'   => 'http://rizzo.lonelyplanet.com/modern/body-header',
-                'footer-endpoint' => 'http://rizzo.lonelyplanet.com/modern/body-footer',
+                'head-endpoint'         => 'http://rizzo.lonelyplanet.com/layouts/modern/head',
+                'pre-header-endpoint'   => 'http://rizzo.lonelyplanet.com/layouts/modern/pre_header',
+                'post-header-endpoint'  => 'http://rizzo.lonelyplanet.com/layouts/modern/post_header',
+                'footer-endpoint'       => 'http://rizzo.lonelyplanet.com/layouts/modern/footer',
             ),
             get_option('rizzo-api', array())
         );
@@ -181,9 +187,10 @@ class RizzoPlugin {
 
         $this->rizzo_theme_hooks = array_merge(
             array(
-                'insert-head'     => true,
-                'insert-body'     => true,
-                'insert-footer'   => true
+                'insert-head'        => true,
+                'insert-pre-header'  => true,
+                'insert-post-header' => true,
+                'insert-footer'      => true
             ),
             get_option('rizzo-theme-hooks', array())
         );
@@ -192,35 +199,23 @@ class RizzoPlugin {
             'timeout' => &$this->rizzo_cron['timeout']
         );
 
-
         // This is just for convenience.
         foreach (array('rizzo_api', 'rizzo_cron', 'rizzo_theme_hooks') as $options_name) {
             foreach ($this->$options_name as $key => &$value) {
                 $this->options[$key] = &$value;
             }
         }
-
-        /*
-        $this->options = array(
-            'head-endpoint'   => &$this->rizzo_api['head-endpoint'],
-            'body-endpoint'   => &$this->rizzo_api['body-endpoint'],
-            'footer-endpoint' => &$this->rizzo_api['footer-endpoint'],
-
-            'timeout'         => &$this->rizzo_cron['timeout'],
-            'cron-time'       => &$this->rizzo_cron['cron-time'],
-            'disable-cron'    => &$this->rizzo_cron['disable-cron'],
-
-            'insert-head'     => &$this->rizzo_theme_hooks['insert-head'],
-            'insert-body'     => &$this->rizzo_theme_hooks['insert-body'],
-            'insert-footer'   => &$this->rizzo_theme_hooks['insert-footer'],
-        );
-        */
         
     }
 
     public function option($name, $default = '')
     {
         return isset($this->options[$name]) ? $this->options[$name] : $default;
+    }
+
+    public function insert_header()
+    {
+        return $this->option('insert-pre-header', false) || $this->option('insert-post-header', false);
     }
 
     public function admin_init()
@@ -263,7 +258,8 @@ class RizzoPlugin {
 
         $labels = array(
             'head-endpoint'   => 'Head Endpoint',
-            'body-endpoint'   => 'Body Endpoint',
+            'pre-header-endpoint' => 'Pre Header Endpoint<br /><small>Cookie compliance, accessibility, <span class="nowrap">ad banner</span></small>',
+            'post-header-endpoint' => 'Post Header Endpoint<br /><small>Main navigation bar</small>',
             'footer-endpoint' => 'Footer Endpoint',
         );
 
@@ -397,7 +393,7 @@ class RizzoPlugin {
     {
         $new_input = array();
 
-        foreach (array('insert-head','insert-body','insert-footer') as $key) {
+        foreach (array('insert-head', 'insert-pre-header', 'insert-post-header', 'insert-footer') as $key) {
             if (isset($input[$key]) && (int)$input[$key] == 1)
                 $new_input[$key] = true;
             else
@@ -419,9 +415,10 @@ class RizzoPlugin {
         );
 
         $fields = array(
-            'insert-head'   => 'Insert Head Content<br /><small>This hooks into wp_head()</small>',
-            'insert-body'   => 'Insert Body Content<br /><small>This uses output buffering.</small>',
-            'insert-footer' => 'Insert Footer Content<br /><small>This hooks into wp_footer()</small>',
+            'insert-head'        => 'Insert Head Content<br /><small>This hooks into wp_head()</small>',
+            'insert-pre-header'  => 'Insert Pre Header Content<br /><small>This uses output buffering.</small>',
+            'insert-post-header' => 'Insert Post Header Content<br /><small>This uses output buffering.</small>',
+            'insert-footer'      => 'Insert Footer Content<br /><small>This hooks into wp_footer()</small>',
         );
 
         foreach ($fields as $key => $label) {
@@ -450,12 +447,14 @@ class RizzoPlugin {
     public function print_theme_hooks_info()
     {
         echo '<p>This plugin hooks into the wp_head and wp_footer functions to output the HTML content for those sections.</p>';
-        echo '<p>Since WordPress doesn&#8217;t have a function like wp_footer for the body, I had to use output buffering to automatically insert the body header into the html.</p>';
+        echo '<p>Since WordPress doesn&#8217;t have a function like wp_footer for the body header, I had to use output buffering to automatically insert the body header into the html.</p>';
 
         printf(
-            '<p>If you don&#8217;t want to use output buffering, uncheck "Insert Body Content", and place this in your theme after the <code>&lt;body&gt;</code> tag:</p><p>%1$s</p>',
-            highlight_string("<?php\nif (function_exists('\\LonelyPlanet\\Rizzo\\body'))\n\t\\LonelyPlanet\\Rizzo\\body();\n?>", true)
+            '<p>If you don&#8217;t want to use output buffering, uncheck "Insert Pre Header Content" and "Insert Post Header Content", and place this in your theme after the <code>&lt;body&gt;</code> tag:</p><p class="rizzo-code-sample">%1$s</p>',
+            highlight_string("<?php\nif (function_exists('\\LonelyPlanet\\Rizzo\\print_headers'))\n\t\\LonelyPlanet\\Rizzo\\print_headers();\n?>", true)
         );
+
+        echo '<p>The <code>print_headers()</code> function takes two optional parameters ($print_pre = true, $print_post = true) that control which of the two headers you want to print out.</p>';
 
     }
 
@@ -567,7 +566,18 @@ class RizzoPlugin {
     public function buffer_template()
     {
         ob_start(array(&$this, 'handle_buffer'));
-        $this->after_body = $this->get('body-endpoint');
+
+        $header = array();
+
+        if ($this->option('insert-pre-header', false))
+            $header[] = $this->get('pre-header-endpoint');
+
+        $header[] = $this->open_wrapper(false, true);
+
+        if ($this->option('insert-post-header', false))
+            $header[] = $this->get('post-header-endpoint');
+
+        $this->after_body = implode('', $header);
     }
 
     function handle_buffer($buffer)
@@ -589,9 +599,33 @@ class RizzoPlugin {
         return $this->get('head-endpoint', $print);
     }
 
-    public function body($print = true)
+    public function pre_header($print = true)
     {
-        return $this->get('body-endpoint', $print);
+        return $this->get('pre-header-endpoint', $print);
+    }
+
+    public function post_header($print = true)
+    {
+        return $this->get('post-header-endpoint', $print);
+    }
+
+    public function open_wrapper($print = true, $set_flag = false)
+    {
+        $wrapper = '<div class="wrapper js-wrapper">';
+
+        if ($print)
+            echo $wrapper;
+
+        if ($print || $set_flag)
+            $this->wrapper_printed = true;
+
+        return $wrapper;
+    }
+
+    public function close_wrapper()
+    {
+        if ($this->wrapper_printed)
+            echo '</div><!-- .wrapper.js-wrapper -->';
     }
 
     public function footer($print = true)
@@ -720,14 +754,23 @@ $wprizzo = new RizzoPlugin(WP_RIZZO_FILE);
 /**
 If you don't want to use output buffering, you can place this in your theme after the <body> tag:
 
-if (function_exists('\LonelyPlanet\Rizzo\body'))
-    \LonelyPlanet\Rizzo\body();
+if (function_exists('\LonelyPlanet\Rizzo\print_headers'))
+    \LonelyPlanet\Rizzo\print_headers();
 */
-function body()
+function print_headers($print_pre = true, $print_post = true)
 {
     global $wprizzo;
-    // Don't do anything if the user preference is to auto insert the body header.
-    if (isset($wprizzo) && $wprizzo->option('insert-body', false) === false) {
-        $wprizzo->body();
+
+    // Don't do anything if the user preference is to auto insert the body headers.
+    if (isset($wprizzo) && $wprizzo->insert_header() === false) {
+
+        if ($print_pre)
+            echo $wprizzo->get('pre-header-endpoint');
+
+        $wprizzo->open_wrapper();
+
+        if ($print_post)
+            echo $wprizzo->get('post-header-endpoint');
+
     }
 }
