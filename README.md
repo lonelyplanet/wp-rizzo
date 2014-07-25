@@ -17,13 +17,15 @@ I've created a settings page where you can change the following:
 * WP cron interval (seconds)
 * Which content to auto insert into the HTML.
 
+Contact us if you need custom endpoints.
+
 ### Output Buffering
 
-If you don’t want to use output buffering, uncheck "Insert Body Content", and place this in your theme after the &lt;body&gt; tag:
+If you don’t want to use output buffering, uncheck "Insert Pre Header Content" and "Insert Post Header Content", and place this in your theme after the &lt;body&gt; tag:
 
 ```php
 <?php
-if (function_exists('\LonelyPlanet\Rizzo\body'))
-    \LonelyPlanet\Rizzo\body();
-?>
+if (function_exists('\LonelyPlanet\Rizzo\print_headers'))
+    \LonelyPlanet\Rizzo\print_headers();
+?> 
 ```
