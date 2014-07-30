@@ -41,6 +41,18 @@ class RizzoPlugin {
 
         add_filter('cron_schedules',           array(&$this, 'add_cron_schedule'));
 
+        /*
+            There are two ways to fix the logo href.
+            1. Filter the post header content every time. 
+            2. Filter it once before it the option is updated.
+
+            I'm going with #2 for now.
+        */
+
+        // add_filter('rizzo_html_post-header-endpoint', array(&$this, 'fix_logo'), 1, 1);
+
+        add_filter('pre_update_option_rizzo_html_post-header-endpoint', array(&$this, 'fix_logo_during_option_update'), 10, 2 );
+
         if (is_admin()) {
 
             add_action('admin_init', array(&$this, 'admin_init'));
@@ -744,6 +756,18 @@ class RizzoPlugin {
 
         }
 
+    }
+
+    public function fix_logo_during_option_update($value, $old_value)
+    {
+        return $this->fix_logo($value);
+    }
+
+    public function fix_logo($html)
+    {
+        $lp_url = 'http://www.lonelyplanet.com';
+        $html = str_replace($lp_url, get_home_url(), $html);
+        return $html;
     }
 
 }
