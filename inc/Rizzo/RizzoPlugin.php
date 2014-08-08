@@ -37,17 +37,10 @@ class RizzoPlugin {
 
         add_filter('cron_schedules',           array(&$this, 'add_cron_schedule'));
 
-        /*
-            There are two ways to fix the logo href.
-            1. Filter the post header content every time. 
-            2. Filter it once before it the option is updated.
+        if ($this->option('update-logo-url', false))
+            add_filter('rizzo_html_post-header-endpoint', array(&$this, 'fix_logo'), 1, 1);
 
-            I'm going with #2 for now.
-        */
-
-        // add_filter('rizzo_html_post-header-endpoint', array(&$this, 'fix_logo'), 1, 1);
-
-        add_filter('pre_update_option_rizzo_html_post-header-endpoint', array(&$this, 'fix_logo_during_option_update'), 10, 2 );
+        // add_filter('pre_update_option_rizzo_html_post-header-endpoint', array(&$this, 'fix_logo_during_option_update'), 10, 2 );
 
         if (is_admin()) {
 
@@ -198,7 +191,8 @@ class RizzoPlugin {
                 'insert-head'        => true,
                 'insert-pre-header'  => true,
                 'insert-post-header' => true,
-                'insert-footer'      => true
+                'insert-footer'      => true,
+                'update-logo-url'    => false
             ),
             get_option('rizzo-theme-hooks', array())
         );
@@ -401,7 +395,7 @@ class RizzoPlugin {
     {
         $new_input = array();
 
-        foreach (array('insert-head', 'insert-pre-header', 'insert-post-header', 'insert-footer') as $key) {
+        foreach (array('insert-head', 'insert-pre-header', 'insert-post-header', 'insert-footer', 'update-logo-url') as $key) {
             if (isset($input[$key]) && (int)$input[$key] == 1)
                 $new_input[$key] = true;
             else
@@ -427,6 +421,7 @@ class RizzoPlugin {
             'insert-pre-header'  => 'Insert Pre Header Content<br /><small>This uses output buffering.</small>',
             'insert-post-header' => 'Insert Post Header Content<br /><small>This uses output buffering.</small>',
             'insert-footer'      => 'Insert Footer Content<br /><small>This hooks into wp_footer()</small>',
+            'update-logo-url'    => 'Set the Lonely Planet logo link to my home URL <small>(' . get_home_url() . ')</small>',
         );
 
         foreach ($fields as $key => $label) {
