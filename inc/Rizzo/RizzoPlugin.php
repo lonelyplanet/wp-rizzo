@@ -761,8 +761,8 @@ class RizzoPlugin {
 
     public function fix_logo($html)
     {
-        $lp_url = 'http://www.lonelyplanet.com';
-        $html = str_replace($lp_url, get_home_url(), $html);
+        // Replace the first occurence of the URL, which should be in the logo.
+        $html =  preg_replace('#' . preg_quote('http://www.lonelyplanet.com') . '#', get_home_url(), $html, 1);
         return $html;
     }
 
