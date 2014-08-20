@@ -50,30 +50,35 @@ class RizzoPlugin {
 
         } else {
 
-            if ( ! in_array($GLOBALS['pagenow'], array('wp-login.php', 'wp-register.php'))) {
-
-                // Set the priority to 1 so that it is printed higher up in the head section.
-                // This will allow other queued css to override it.
-
-                if ($this->option('insert-head'))
-                    add_action('wp_head', array(&$this, 'head'), 1, 0);
-
-                // This will automatically insert the body header content using ob_start().
-                if ($this->insert_header())
-                    add_action('init', array(&$this, 'buffer_template'), 1, 0);
-
-                if ($this->option('insert-footer'))
-                    add_action('wp_footer', array(&$this, 'footer'), 1, 0);
-
-                add_action('wp_footer', array(&$this, 'close_wrapper'), 1000, 0);
-
-            }
+            add_action('wp', array(&$this, 'setup_hooks'));
 
         }   
 
         register_activation_hook($this->plugin_file,   array(&$this, 'activate'));
         register_deactivation_hook($this->plugin_file, array(&$this, 'deactivate'));
 
+    }
+
+    public function setup_hooks()
+    {
+        if ( ! defined('DOING_CRON') && ! is_feed() && ! in_array($GLOBALS['pagenow'], array('wp-login.php', 'wp-register.php'))) {
+
+            // Set the priority to 1 so that it is printed higher up in the head section.
+            // This will allow other queued css to override it.
+
+            if ($this->option('insert-head'))
+                add_action('wp_head', array(&$this, 'head'), 1, 0);
+
+            // This will automatically insert the body header content using ob_start().
+            if ($this->insert_header())
+                add_action('init', array(&$this, 'buffer_template'), 1, 0);
+
+            if ($this->option('insert-footer'))
+                add_action('wp_footer', array(&$this, 'footer'), 1, 0);
+
+            add_action('wp_footer', array(&$this, 'close_wrapper'), 1000, 0);
+
+        }
     }
 
     public function modify_admin_bar($bar)
@@ -443,7 +448,6 @@ class RizzoPlugin {
                     )
                 )
             );
-
         }
 
     }
@@ -459,7 +463,6 @@ class RizzoPlugin {
         );
 
         echo '<p>The <code>print_headers()</code> function takes two optional parameters ($print_pre = true, $print_post = true) that control which of the two headers you want to print out.</p>';
-
     }
 
     public function rizzo_url($url)
@@ -481,7 +484,6 @@ class RizzoPlugin {
 
     public function print_cron_section_info()
     {
-
         $has_scheduled_event = wp_next_scheduled('rizzo-cron');
 
         $messages = array();
@@ -505,9 +507,7 @@ class RizzoPlugin {
 
         echo '<p>This plugin uses <a href="http://codex.wordpress.org/Function_Reference/wp_schedule_event" target="_blank">scheduled events</a>, which is the way WordPress does cron jobs.</p>';
         echo '<p>If you don&#8217t want to always have the latest content from rizzo, you can disable the cron below.</p>';
-
     }
-
 
     public function rizzo_cron_option_updated($old_value, $new_value)
     {
@@ -715,7 +715,6 @@ class RizzoPlugin {
         do_action('rizzo-fetch-error', $url, $option_key, $args, $response);
 
         return false;
-
     }
 
     public function fetch_error($url, $option_key, $args, $response)
