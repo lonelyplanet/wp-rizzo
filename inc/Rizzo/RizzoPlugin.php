@@ -180,8 +180,9 @@ class RizzoPlugin {
 
         $this->rizzo_cron = array_merge(
             array(
-                'timeout'   => 3,
-                'cron-time' => 300, // Five minutes.
+                'timeout'      => 3,
+                'cron-time'    => 300, // Five minutes.
+                'disable-cron' => false
             ),
             get_option('rizzo-cron', array())
         );
