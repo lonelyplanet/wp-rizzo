@@ -50,7 +50,7 @@ class RizzoPlugin {
 
         } else {
 
-            add_action('wp', array(&$this, 'setup_hooks'));
+            add_action('init', array(&$this, 'setup_hooks'));
 
         }   
 
@@ -69,9 +69,8 @@ class RizzoPlugin {
             if ($this->option('insert-head'))
                 add_action('wp_head', array(&$this, 'head'), 1, 0);
 
-            // This will automatically insert the body header content using ob_start().
             if ($this->insert_header())
-                add_action('init', array(&$this, 'buffer_template'), 1, 0);
+                $this->buffer_template();
 
             if ($this->option('insert-footer'))
                 add_action('wp_footer', array(&$this, 'footer'), 1, 0);
