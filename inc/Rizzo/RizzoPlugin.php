@@ -61,7 +61,12 @@ class RizzoPlugin {
 
     public function setup_hooks()
     {
-        if ( ! defined('DOING_CRON') && ! is_feed() && ! in_array($GLOBALS['pagenow'], array('wp-login.php', 'wp-register.php'))) {
+        if ( ! defined('DOING_CRON') &&
+             ! defined('DOING_AJAX') &&
+             ! defined('APP_REQUEST') &&
+             ! defined('XMLRPC_REQUEST') &&
+             ! is_feed() &&
+             ! in_array( $GLOBALS['pagenow'], array( 'wp-login.php', 'wp-register.php' ) ) ) {
 
             // Set the priority to 1 so that it is printed higher up in the head section.
             // This will allow other queued css to override it.
