@@ -6,6 +6,11 @@ use LonelyPlanet\Autoloader;
 defined('ABSPATH') || exit;
 
 
+// Don't run on command line.
+if ( php_sapi_name() === 'cli' )
+    return;
+
+
 include __DIR__ . '/inc/functions.php';
 include __DIR__ . '/inc/Autoloader.php';
 
