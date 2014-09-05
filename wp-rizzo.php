@@ -7,7 +7,7 @@ defined('ABSPATH') || exit;
 
 
 // Don't run on command line.
-if ( php_sapi_name() === 'cli' )
+if ( php_sapi_name() === 'cli' && ! defined('DOING_CRON') )
     return;
 
 
