@@ -6,7 +6,7 @@ use LonelyPlanet\Autoloader;
 defined('ABSPATH') || exit;
 
 
-// Don't run on command line.
+// Don't run on command line unless doing cron.
 if ( php_sapi_name() === 'cli' && ! defined('DOING_CRON') )
     return;
 
