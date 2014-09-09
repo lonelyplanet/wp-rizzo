@@ -595,36 +595,17 @@ class RizzoPlugin {
         $insert_header = false;
 
         $properties = array(
-            'is_single',
-            'is_preview',
-            'is_page',
-            'is_archive',
-            'is_date',
-            'is_year',
-            'is_month',
-            'is_day',
-            'is_time',
-            'is_author',
-            'is_category',
-            'is_tag',
-            'is_tax',
-            'is_search',
-            'is_feed',
-            'is_comment_feed',
-            'is_trackback',
-            'is_404',
-            'is_paged',
-            'is_admin',
-            'is_attachment',
             'is_singular',
+            'is_preview',
+            'is_archive',
+            'is_search',
+            'is_trackback',
+            'is_paged',
             'is_posts_page',
-            'is_post_type_archive',
-            // 'is_home',
-            // 'is_comments_popup',
-            // 'is_robots',
+            'is_404',
         );
 
-        foreach ($properties as $prop) {
+        foreach ($properties as &$prop) {
             if ( $wp_query->$prop === true ) {
                 $insert_header = true;
                 break;
