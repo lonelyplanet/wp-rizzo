@@ -594,34 +594,55 @@ class RizzoPlugin {
 
         $insert_header = false;
 
-        $properties = array(
-            'is_singular',
-            'is_preview',
-            'is_archive',
-            'is_search',
-            'is_trackback',
-            'is_paged',
-            'is_posts_page',
-            'is_404',
+        $properties = apply_filters(
+            'rizzo-check-wp-query-properties',
+            array(
+                'is_singular',
+                'is_preview',
+                'is_archive',
+                'is_search',
+                'is_trackback',
+                'is_paged',
+                'is_posts_page',
+                'is_home',
+                'is_404',
+            )
         );
 
-        foreach ($properties as &$prop) {
+        foreach ( $properties as &$prop ) {
             if ( $wp_query->$prop === true ) {
                 $insert_header = true;
                 break;
             }
         }
 
-        return $insert_header ? substr_replace(
-            $buffer,
-            apply_filters('rizzo-after-body', $this->after_body),
-            stripos(
-                $buffer,
-                '>',
-                stripos($buffer, '<body')
-            ) + 1,
-            0
-        ) : $buffer ;
+        // Use this filter if you have your own criteria for inserting the header into the buffer.
+        $insert_header = apply_filters( 'rizzo-insert-header-buffer', $insert_header );
+
+        if ($insert_header) {
+
+            $body_position = stripos($buffer, '<body');
+
+            if ($body_position !== false) {
+
+                $closing_body_char = stripos( $buffer, '>', $body_position );
+
+                if ($closing_body_char !== false) {
+
+                    return substr_replace(
+                        $buffer,
+                        apply_filters( 'rizzo-after-body', $this->after_body),
+                        $closing_body_char + 1,
+                        0
+                    );
+
+                }
+
+            }
+
+        }
+
+        return $buffer;
     }
 
     public function head($print = true)
