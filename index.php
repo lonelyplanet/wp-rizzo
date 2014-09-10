@@ -5,7 +5,7 @@ Plugin Group: Lonely Planet
 Plugin URI: http://lonelyplanet.com/
 Author: Eric King
 Author URI: http://webdeveric.com/
-Description: This plugin fetches the three HTML chunks provided by Rizzo and then automatically inserts them into the theme output.
+Description: This plugin fetches the four HTML chunks provided by Rizzo and then automatically inserts them into the theme output.
 Version: 0.4.5
 */
 
