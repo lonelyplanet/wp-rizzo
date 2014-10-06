@@ -61,7 +61,8 @@ class RizzoPlugin {
 
     public function setup_hooks()
     {
-        if ( ! defined('DOING_CRON') &&
+        if ( ! defined('WP_CLI') &&
+             ! defined('DOING_CRON') &&
              ! defined('DOING_AJAX') &&
              ! defined('APP_REQUEST') &&
              ! defined('XMLRPC_REQUEST') &&
