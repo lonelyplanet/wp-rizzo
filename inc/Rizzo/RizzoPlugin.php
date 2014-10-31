@@ -88,13 +88,15 @@ class RizzoPlugin {
 
     public function modify_admin_bar($bar)
     {
-        $bar->add_node(
-            array(
-                'id'    => 'rizzo-settings',
-                'title' => 'Rizzo Settings',
-                'href'  => admin_url('options-general.php?page=rizzo-settings'),
-            )
-        );
+        if ( current_user_can('manage_options') ) {
+            $bar->add_node(
+                array(
+                    'id'    => 'rizzo-settings',
+                    'title' => 'Rizzo Settings',
+                    'href'  => admin_url('options-general.php?page=rizzo-settings'),
+                )
+            );
+        }
     }
 
     function plugin_links($links, $file)
