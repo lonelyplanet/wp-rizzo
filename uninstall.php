@@ -5,8 +5,13 @@ if ( !defined('WP_UNINSTALL_PLUGIN'))
 wp_clear_scheduled_hook('rizzo-cron');
 
 $options = array(
+    'wp-rizzo-version',
     'rizzo-api',
+    'rizzo-api-endpoints',
+    'rizzo-api-args',
     'rizzo-cron',
+    'rizzo-fetch-count',
+    'rizzo-fetch-time',
     'rizzo-theme-hooks',
     'rizzo-cron-last-run',
     'rizzo-cron-run-count',
