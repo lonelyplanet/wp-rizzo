@@ -1,0 +1,45 @@
+@import "colour_palette"
+
+.cron-disabled
+  color: $red
+
+.cron-enabled
+  color: $green
+
+.nowrap
+  white-space: nowrap
+
+.rizzo-code-sample
+  code
+    display: block
+    padding: 1em
+    margin: 0
+    background: #FCFCFC
+    border-left: 4px solid #206FAC
+
+#wp-rizzo-fetch-button
+  display: inline-block
+  vertical-align: middle
+  background: $linkblue
+  color: #FFF
+  border: 0
+  border-radius: 3px
+  font-size: 14px
+  padding: 5px 10px
+  cursor: pointer
+  transition: background ease-in-out 200ms
+  &:hover
+    background-color: mix($linkblue, white, 80%)
+  &.wait
+    background-color: $green
+
+#wp-rizzo-last-fetch
+  display: inline-block
+  vertical-align: middle
+  font-size: 14px
+  margin-right: 10px
+  &:before
+    content: "Last fetch: "
+  &:empty
+    display: none
+

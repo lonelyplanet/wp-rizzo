@@ -1,0 +1,7 @@
+{
+"version": 3,
+"mappings": "AAAA,cAAc,CACZ,KAAK,CAAE,IAAI,CAEb,aAAa,CACX,KAAK,CAAE,KAAK,CAEd,OAAO,CACL,WAAW,CAAE,MAAM,CAGnB,uBAAI,CACF,OAAO,CAAE,KAAK,CACd,OAAO,CAAE,GAAG,CACZ,MAAM,CAAE,CAAC,CACT,UAAU,CAAE,OAAO,CACnB,WAAW,CAAE,iBAAiB",
+"sources": ["../sass/rizzo-admin.sass"],
+"names": [],
+"file": "rizzo-admin.css"
+}
