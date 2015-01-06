@@ -30,17 +30,3 @@ function timer($which, $time = null)
     $timer[$which] = isset($time) ? $time : time();
     return $timer;
 }
-
-function rizzo_cron_start_timer()
-{
-    timer('start', time());
-}
-
-function rizzo_cron_stop_timer()
-{
-    $timer = timer('stop', time());
-    update_option('rizzo-cron-last-run', $timer);
-}
-
-add_action('rizzo-cron', __NAMESPACE__ . '\rizzo_cron_start_timer', 1 );
-add_action('rizzo-cron', __NAMESPACE__ . '\rizzo_cron_stop_timer', PHP_INT_MAX );
