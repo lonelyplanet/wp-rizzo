@@ -26,7 +26,6 @@ class RizzoPlugin {
 
         add_action( 'rizzo-fetch-error', array( &$this, 'fetch_error' ), 10, 4);
         add_action( 'admin_bar_menu',    array( &$this, 'modify_admin_bar' ), 1000, 1);
-        add_action( 'admin_init',        array( &$this, 'check_upgrade' ) );
         add_action( 'wp_ajax_wp-rizzo-fetch-endpoints', array( &$this, 'ajax_fetch_endpoints' ) );
 
         add_filter( 'wp-rizzo-can-setup-hooks', array( &$this, 'can_setup_hooks' ), 10, 1 );
@@ -256,6 +255,8 @@ class RizzoPlugin {
 
     public function admin_init()
     {
+        $this->check_upgrade();
+
         $this->settings_tabs = array(
             'rizzo-api'         => 'Rizzo API',
             'rizzo-theme-hooks' => 'Theme Hooks'
@@ -683,6 +684,13 @@ class RizzoPlugin {
     public function fetch($url, $option_key, array $args = array() )
     {
         $args = array_merge($this->rizzo_api_args, $args);
+
+        $args['user-agent'] = sprintf(
+            'WordPress/%s; WP Rizzo/%s; %s',
+            get_bloginfo( 'version' ),
+            WP_RIZZO_VERSION,
+            get_bloginfo( 'url' )
+        );
 
         $response = wp_remote_get($url, $args);
 
