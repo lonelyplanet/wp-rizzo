@@ -32,6 +32,10 @@
             console.log( data );
             button.removeClass("wait");
             last_fetch.text( new Date( data.data.time * 1000 ).toLocaleString() );
+            last_fetch.addClass("fetched");
+            setTimeout( function() {
+                last_fetch.removeClass("fetched");
+            }, 1500 );
         });
     });
 
