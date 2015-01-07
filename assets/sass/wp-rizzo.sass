@@ -36,10 +36,19 @@
 #wp-rizzo-last-fetch
   display: inline-block
   vertical-align: middle
-  font-size: 14px
+  font-size: 12px
+  font-weight: 600
+  color: #555
+  padding: 0 10px
   margin-right: 10px
+  border-radius: 3px
+  transition: all ease-in-out 200ms
   &:before
     content: "Last fetch: "
   &:empty
     display: none
+  &.fetched
+    color: #FFF
+    background: $green
+
 
