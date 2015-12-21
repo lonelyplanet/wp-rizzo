@@ -1,6 +1,8 @@
 <?php
-if ( !defined('WP_UNINSTALL_PLUGIN'))
-    exit();
+
+if ( ! defined('WP_UNINSTALL_PLUGIN') ) {
+    exit;
+}
 
 wp_clear_scheduled_hook('rizzo-cron');
 
@@ -22,6 +24,6 @@ $options = array(
     'rizzo_html_footer-endpoint',
 );
 
-foreach ($options as $option) {
-    delete_option($option);
+foreach ( $options as $option ) {
+    delete_option( $option );
 }

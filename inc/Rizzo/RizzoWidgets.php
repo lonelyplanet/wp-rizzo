@@ -6,7 +6,7 @@ class RizzoWidgets
     protected $sidebar_args;
     protected $format;
 
-    public function __construct(array $sidebar_args, $format = null)
+    public function __construct( array $sidebar_args, $format = null )
     {
         $this->sidebar_args = $sidebar_args;
         $this->format = $format;
@@ -22,14 +22,17 @@ class RizzoWidgets
     {
         $sidebar = null;
 
-        if (isset($this->sidebar_args['id']))
+        if ( isset( $this->sidebar_args['id'] ) ) {
             $sidebar = $this->sidebar_args['id'];
+        }
 
-        if (isset($this->sidebar_args['name']))
+        if ( isset( $this->sidebar_args['name'] ) ) {
             $sidebar = $this->sidebar_args['name'];
+        }
 
-        if ( ! isset($sidebar))
+        if ( ! isset( $sidebar ) ) {
             return '';
+        }
 
         ob_start();
 
@@ -44,16 +47,18 @@ class RizzoWidgets
     {
         $widgets = $this->get_widgets();
 
-        if ($widgets === '')
+        if ( $widgets === '' ) {
             return '';
+        }
 
-        if (isset($this->format) && $this->format !== '')
-            $widgets = sprintf($this->format, $widgets);
+        if ( isset( $this->format ) && $this->format !== '' ) {
+            $widgets = sprintf( $this->format, $widgets );
+        }
 
         return $widgets;
     }
 
-    public function get_html($html)
+    public function get_html( $html )
     {
         return $html . $this->get_output();
     }
@@ -62,5 +67,4 @@ class RizzoWidgets
     {
         return $this->get_output();
     }
-
 }
