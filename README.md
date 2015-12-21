@@ -1,11 +1,11 @@
 # WP Rizzo
 
-This plugin provides html content from http://rizzo.lonelyplanet.com/.
+This plugin provides html content from [Rizzo](http://rizzo.lonelyplanet.com/).
 It will automatically include the head section, body header, and footer section.
 
-It hooks into the wp_head and wp_footer functions to output the HTML content.
+It hooks into the `wp_head` and `wp_footer` functions to output the HTML content.
 
-Since WordPress doesn't have a function like wp_footer for the body, I had to use
+Since WordPress doesn't have a function like `wp_footer` for the body, I had to use
 output buffering to automatically insert the body header into the html.
 
 ## Features
@@ -25,7 +25,8 @@ If you don’t want to use output buffering, uncheck "Insert Pre Header Content"
 
 ```php
 <?php
-if (function_exists('\LonelyPlanet\Rizzo\print_headers'))
+if ( function_exists( '\LonelyPlanet\Rizzo\print_headers' ) ) {
     \LonelyPlanet\Rizzo\print_headers();
+}
 ?> 
 ```
