@@ -1,0 +1,16 @@
+{
+  "name": "lonelyplanet/wp-rizzo",
+  "description": "WordPress plugin for pulling in rizzo content.",
+  "license": "proprietary",
+  "type": "wordpress-plugin",
+  "keywords": [ "Lonely Planet", "Rizzo" ],
+  "authors": [
+    {
+      "name": "Eric King",
+      "email": "eric.king@lonelyplanet.com"
+    }
+  ],
+  "require": {
+    "composer/installers": "^1.0"
+  }
+}
